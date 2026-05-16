@@ -1,0 +1,29 @@
+# spring context variables
+server:
+  port: 8060
+  error:
+    whitelabel:
+      enabled: false
+spring:
+  application:
+    name: callback
+  main:
+    banner-mode: off
+# logging
+logging:
+  level:
+    root: WARN
+    org.springframework.web: INFO
+    edu.orders.server: DEBUG
+#application variables
+data:
+  id:
+    pattern: yyyyMMddHHmmssSSS
+    zone:
+      id: Europe/Warsaw
+crypto:
+  auth:
+    key: ${CRYPT_AUTHORISE_KEY:defaultAuthorisationCryptoKey}
+    algorithm: ${CRYPT_AUTH_ALGORITHM:AES/GCM/NoPadding}
+  date:
+    pattern: ${CRYPT_DATE_PATTERN:yyyy-MM-dd_HH:mm:ss}

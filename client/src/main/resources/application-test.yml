@@ -1,0 +1,38 @@
+# spring context variables
+server:
+  port: 8070
+  error:
+    whitelabel:
+      enabled: false
+spring:
+  application:
+    name: orders-client
+  main:
+    banner-mode: off
+# logging
+logging:
+  level:
+    root: WARN
+    org.springframework.web: INFO
+    edu.orders.client: DEBUG
+#application variables
+data:
+  id:
+    pattern: ${DATE_ID_PATTERN:yyyyMMddHHmmssSSS}
+    zone:
+      id: ${DATA_ID_ZONE:Europe/Warsaw}
+remote:
+  order:
+    server: ${REMOTE_ORDER_SERVER_URL:http://localhost:8060/api/orders/create}
+order-client:
+  id: ${ORDER_CLIENT_ID:defaultOrderClientId}
+  pass: ${ORDER_CLIENT_PASS:defaultOrderClientPassword}
+  callback:
+    url: http://localhost:${server.port}/api/orders/confirmed
+  demo: ${ORDER_CLIENT_DEMO:true}
+crypto:
+  auth:
+    key: ${CRYPT_AUTHORISE_KEY:defaultAuthorisationCryptoKey}
+    algorithm: ${CRYPT_AUTH_ALGORITHM:AES/GCM/NoPadding}
+  date:
+    pattern: ${CRYPT_DATE_PATTERN:yyyy-MM-dd_HH:mm:ss}
