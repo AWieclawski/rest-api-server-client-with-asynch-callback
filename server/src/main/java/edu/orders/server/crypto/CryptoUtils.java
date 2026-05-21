@@ -17,23 +17,23 @@ import java.util.Base64;
  */
 class CryptoUtils {
 
-    public static GCMParameterSpec getIvFromBase64(String ivString) {
+    static GCMParameterSpec getIvFromBase64(String ivString) {
         byte[] iv = Base64.getDecoder().decode(ivString);
         return new GCMParameterSpec(128, iv);
     }
 
-    public static String generateIvString() {
+    static String generateIvString() {
         byte[] iv = getIvBytes();
         return Base64.getEncoder().encodeToString(iv);
     }
 
-    private static byte[] getIvBytes() {
+    static byte[] getIvBytes() {
         byte[] iv = new byte[12];
         new SecureRandom().nextBytes(iv);
         return iv;
     }
 
-    public static SecretKey getKeyFromPassword(String password, String salt)
+    static SecretKey getKeyFromPassword(String password, String salt)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -42,7 +42,7 @@ class CryptoUtils {
                 .getEncoded(), "AES");
     }
 
-    public static String encryptAESPasswordBased(String plainText, SecretKey key, GCMParameterSpec iv, String algorithm)
+    static String encryptAESPasswordBased(String plainText, SecretKey key, GCMParameterSpec iv, String algorithm)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(algorithm);
@@ -51,7 +51,7 @@ class CryptoUtils {
                 .encodeToString(cipher.doFinal(plainText.getBytes()));
     }
 
-    public static String decryptAESPasswordBased(String cipherText, SecretKey key, GCMParameterSpec iv, String algorithm)
+    static String decryptAESPasswordBased(String cipherText, SecretKey key, GCMParameterSpec iv, String algorithm)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(algorithm);

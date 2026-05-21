@@ -6,7 +6,7 @@ server:
       enabled: false
 spring:
   application:
-    name: callback
+    name: orders-server
   main:
     banner-mode: off
 # logging
@@ -18,9 +18,9 @@ logging:
 #application variables
 data:
   id:
-    pattern: yyyyMMddHHmmssSSS
+    pattern: ${DATE_ID_PATTERN:yyyyMMddHHmmssSSS}
     zone:
-      id: Europe/Warsaw
+      id: ${DATA_ID_ZONE:Europe/Warsaw}
 crypto:
   auth:
     key: ${CRYPT_AUTHORISE_KEY:defaultAuthorisationCryptoKey}

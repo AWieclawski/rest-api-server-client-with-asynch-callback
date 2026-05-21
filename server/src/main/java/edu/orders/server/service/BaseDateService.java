@@ -12,10 +12,10 @@ import java.util.Random;
 @Component
 public class BaseDateService {
 
-    @Value("${data.id.pattern:yyyyMMddHHmmssSSS}")
+    @Value("${data.id.pattern}")
     private String pattern;
 
-    @Value("${data.id.zone.id:Europe/Warsaw}")
+    @Value("${data.id.zone.id}")
     private String zoneId;
 
     public String getBaseTimestampId() {
