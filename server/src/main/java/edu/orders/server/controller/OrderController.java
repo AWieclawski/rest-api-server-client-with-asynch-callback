@@ -1,6 +1,5 @@
 package edu.orders.server.controller;
 
-import edu.orders.server.crypto.CryptoServerConverter;
 import edu.orders.server.dto.ApiErrorDto;
 import edu.orders.server.dto.OrderHeader;
 import edu.orders.server.dto.OrderRequestDto;
@@ -14,11 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("${endpoint.orders}")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -26,21 +24,16 @@ public class OrderController {
 
     private final BaseDateService baseDateService;
 
-    private final CryptoServerConverter cryptoServerConverter;
-
-    @PostMapping("/create")
+    @PostMapping("${endpoint.order-create}")
     public ResponseEntity<Object> createOrder(HttpServletRequest requestEntity) {
 
         // Generate a unique order ID
         String orderId = baseDateService.getBaseTimestampId();
 
-
-        Enumeration<String> requestIds = requestEntity.getHeaders(OrderHeader.REQUEST_ID.getValue());
-
         // Convert headers to OrderRequestDto
         OrderRequestDto request;
         try {
-            request = cryptoServerConverter.convertRequestBody(requestEntity);
+            request = orderResponseService.getCryptoServerConverter().convertRequestBody(requestEntity);
         } catch (Exception ex) {
             log.error("Request entity error. class {} message: {} ", ex.getClass(), ex.getMessage(), ex.getCause());
             ApiErrorDto requestError = ErrorHelper.requestErrorBuild(ex, requestEntity);

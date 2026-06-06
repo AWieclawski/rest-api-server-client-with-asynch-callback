@@ -10,6 +10,7 @@ import edu.orders.server.data.service.OrderService;
 import edu.orders.server.dto.ApiErrorDto;
 import edu.orders.server.dto.OrderCallBackDto;
 import edu.orders.server.dto.OrderRequestDto;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -31,6 +32,7 @@ public class OrderResponseService {
     public final static String BEAN_NAME = "edu.orders.client.service.OrderRequestService";
 
     private final RestTemplate restTemplate;
+    @Getter
     private final CryptoServerConverter cryptoServerConverter;
     private final OrderService orderService;
 
@@ -92,7 +94,7 @@ public class OrderResponseService {
     // Send callback to client's URL
     private void sendCallbackOrder(OrderRequestDto orderRequestDto, OrderCallBackDto orderCallBackDto) {
         HttpEntity<String> orderServerResponse =
-                cryptoServerConverter.getErrorServerResponse(orderCallBackDto, orderRequestDto.getRequestId());
+                cryptoServerConverter.getCallBackServerResponse(orderCallBackDto, orderRequestDto.getRequestId());
 
         // Show Response Entity Headers
         try {

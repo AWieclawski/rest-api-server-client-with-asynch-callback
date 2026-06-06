@@ -27,3 +27,7 @@ crypto:
     algorithm: ${CRYPT_AUTH_ALGORITHM:AES/GCM/NoPadding}
   date:
     pattern: ${CRYPT_DATE_PATTERN:yyyy-MM-dd_HH:mm:ss}
+# end-points
+endpoint:
+  orders: /api/orders
+  order-create: /create

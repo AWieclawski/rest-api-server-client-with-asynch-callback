@@ -40,7 +40,7 @@ public class CryptoServerConverter {
         throw new RuntimeException("Request method not supported: " + requestEntity.getMethod());
     }
 
-    public HttpEntity<String> getErrorServerResponse(OrderCallBackDto orderCallBackDto, String orderRequestId) {
+    public HttpEntity<String> getCallBackServerResponse(OrderCallBackDto orderCallBackDto, String orderRequestId) {
         Customer customer = customersRepository.findByCustomerId(orderCallBackDto.getCustomerId());
         HttpHeaders preparedAuthorisationHeaders = cryptoService.prepareAuthorisationHeaders(customer.getPassword(), orderCallBackDto.getCustomerId());
         preparedAuthorisationHeaders.set(OrderHeader.REQUEST_ID.getValue(), orderRequestId);
