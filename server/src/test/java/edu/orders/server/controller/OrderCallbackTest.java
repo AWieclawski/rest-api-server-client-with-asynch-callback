@@ -1,13 +1,11 @@
 package edu.orders.server.controller;
 
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.orders.server.crypto.CryptoServerConverter;
 import edu.orders.server.data.model.Customer;
 import edu.orders.server.data.model.OrderStatus;
 import edu.orders.server.data.repository.CustomersRepository;
-import edu.orders.server.dto.ItemDto;
 import edu.orders.server.dto.OrderCallBackDto;
 import edu.orders.server.dto.OrderHeader;
 import edu.orders.server.dto.OrderRequestDto;
@@ -24,17 +22,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,12 +96,12 @@ class OrderCallbackTest {
         // 1. Get the mock callback server's URL (e.g., "http://localhost:54321/callback")
         String callbackUrl = mockCallbackServer.url(url).toString();
         log.debug("Mock server callback url confirmed: {}", callbackUrl);
-        OrderRequestDto demoOrderRequestDto = getDemoOrderRequestDto(callbackUrl);
-        OrderCallBackDto orderCallBackDto = getOrderCallBackDto(customerId, orderId);
-        String encodedBody = getDummyObjectMapper().writeValueAsString(orderCallBackDto);
+        OrderRequestDto demoOrderRequestDto = StubsFactory.getDemoOrderRequestDto(callbackUrl);
+        OrderCallBackDto orderCallBackDto = StubsFactory.getOrderCallBackDto(customerId, orderId);
+        String encodedBody = StubsFactory.getDummyObjectMapper().writeValueAsString(orderCallBackDto);
         Mockito.when(mockCryptoServerConverter.convertRequestBody(any(HttpServletRequest.class))).thenReturn(demoOrderRequestDto);
         Mockito.when(mockCryptoServerConverter.getCallBackServerResponse(any(OrderCallBackDto.class), anyString()))
-                .thenReturn(new HttpEntity<>(encodedBody, prepareAuthorisationHeaders(customerPass, customerPass)));
+                .thenReturn(new HttpEntity<>(encodedBody, StubsFactory.prepareAuthorisationHeaders(customerPass, customerPass)));
         // MockWebServer will respond with the queued stub.
         MockResponse mockResponse = new MockResponse()
                 .addHeader("Content-Type", "text/plain;charset=ISO-8859-1")
@@ -122,7 +113,7 @@ class OrderCallbackTest {
 
         // 3. Send POST /orders to trigger async processing
         mockMvc.perform(post(orderEndPoint + methodEndPoint)
-                        .headers(prepareAuthorisationHeaders(customerPass, customerPass))
+                        .headers(StubsFactory.prepareAuthorisationHeaders(customerPass, customerPass))
                         .contentType("text/plain;charset=ISO-8859-1")
                         .accept("text/plain, application/json, application/*+json, */*")
                         .content(requestBody))
@@ -139,55 +130,11 @@ class OrderCallbackTest {
 
             // 7. Parse callback payload and validate contents
             String callbackBody = recordedRequest.getBody().readUtf8();
-            OrderCallBackDto callback = getDummyObjectMapper().readValue(callbackBody, OrderCallBackDto.class);
+            OrderCallBackDto callback = StubsFactory.getDummyObjectMapper().readValue(callbackBody, OrderCallBackDto.class);
 
             assertThat(callback.getStatus()).isEqualTo(OrderStatus.PROCESSED);
             assertThat(callback.getOrderId()).isNotEmpty(); // Order ID is generated
         });
-    }
-
-    private OrderRequestDto getDemoOrderRequestDto(String callbackUrl) {
-        List<ItemDto> items = new ArrayList<>();
-        items.add(ItemDto.builder().id("test-item-id-AAA").description("test-item-descAAA").price(new BigDecimal("123.45")).quantity(BigDecimal.TEN).build());
-        items.add(ItemDto.builder().id("test-item-id-BBB").description("test-item-desc-BBB").price(new BigDecimal("321.54")).quantity(BigDecimal.ONE).build());
-        return OrderRequestDto.builder()
-                .requestId("test-requestId")
-                .items(items)
-                .callbackUrl(callbackUrl)
-                .build();
-    }
-
-    private OrderCallBackDto getOrderCallBackDto(String customerId, String orderId) {
-        List<ItemDto> items = new ArrayList<>();
-        items.add(ItemDto.builder().id("test-item-id-AAA").description("test-item-descAAA").price(new BigDecimal("123.45")).quantity(BigDecimal.TEN).build());
-        items.add(ItemDto.builder().id("test-item-id-BBB").description("test-item-desc-BBB").price(new BigDecimal("321.54")).quantity(BigDecimal.ONE).build());
-        return OrderCallBackDto.builder()
-                .customerId(customerId)
-                .orderId(orderId)
-                .items(items)
-                .status(OrderStatus.PROCESSED)
-                .build();
-    }
-
-    HttpHeaders prepareAuthorisationHeaders(String password, String customerId) {
-        HttpHeaders headers = new HttpHeaders();
-        String formattedDate = getFormattedDate();
-        headers.set("C-Base-Date", formattedDate);
-        headers.set("C-Base-IV", "generateIvString");
-        headers.set("C-Customer-Id", customerId);
-        headers.set("C-Base-Auth", Base64.getEncoder().encodeToString(password.getBytes()));
-        return headers;
-    }
-
-    private String getFormattedDate() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss"));
-    }
-
-    private ObjectMapper getDummyObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        // Allow empty strings to be treated as null for object types
-        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-        return objectMapper;
     }
 
 }
